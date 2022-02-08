@@ -27,7 +27,7 @@ h2 {
   line-height: 24px;
   font-size: 16px;
   font-weight: 600;
-  color: rgb(188, 188, 188);
+  color: rgb(255, 255, 255);
   fill: rgb(36, 41, 46);
 }
 
