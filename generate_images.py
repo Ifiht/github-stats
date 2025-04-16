@@ -90,6 +90,40 @@ fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8z"></path></svg>
         f.write(output)
 
 
+async def generate_trophies(s: Stats) -> None:
+    """
+    Downloads the GitHub Trophy SVG and saves it to the generated folder,
+    only if the file size is reasonable.
+    """
+    username = s.user
+    session = s.session
+    url = f"https://github-profile-trophy.vercel.app/?username={username}&theme=darkhub"
+    output_path = "generated/trophies.svg"
+
+    async with session.get(url) as resp:
+        if resp.status != 200:
+            print(f"Failed to fetch trophy SVG: {resp.status}")
+            return
+
+        content = await resp.read()
+        new_size = len(content)
+
+        if new_size == 0:
+            print("Downloaded trophy SVG is empty. Aborting write.")
+            return
+
+        if os.path.exists(output_path):
+            old_size = os.path.getsize(output_path)
+            if new_size < old_size * 0.8:
+                print(f"New trophy SVG is suspiciously small ({new_size} bytes vs {old_size} bytes). Skipping overwrite.")
+                return
+
+        generate_output_folder()
+        with open(output_path, "wb") as f:
+            f.write(content)
+        print(f"Trophy SVG saved to '{output_path}' ({new_size} bytes)")
+
+
 ################################################################################
 # Main Function
 ################################################################################
@@ -129,7 +163,11 @@ async def main() -> None:
             exclude_langs=excluded_langs,
             ignore_forked_repos=ignore_forked_repos,
         )
-        await asyncio.gather(generate_languages(s), generate_overview(s))
+        await asyncio.gather(
+            generate_languages(s),
+            generate_overview(s),
+            generate_trophies(s),
+        )
 
 
 if __name__ == "__main__":
