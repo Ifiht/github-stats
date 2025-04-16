@@ -96,7 +96,7 @@ async def generate_trophies(s: Stats) -> None:
     only if the file size is reasonable.
     """
     username = s.username
-    session = s.session
+    session = s.queries.session
     url = f"https://github-profile-trophy.vercel.app/?username={username}&theme=darkhub"
     output_path = "generated/trophies.svg"
 
