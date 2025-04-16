@@ -95,7 +95,7 @@ async def generate_trophies(s: Stats) -> None:
     Downloads the GitHub Trophy SVG and saves it to the generated folder,
     only if the file size is reasonable.
     """
-    username = await s.username
+    username = s.username
     session = s.session
     url = f"https://github-profile-trophy.vercel.app/?username={username}&theme=darkhub"
     output_path = "generated/trophies.svg"
