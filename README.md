@@ -13,6 +13,10 @@ Actions.
 This project is currently a work-in-progress; there will always be more
 interesting stats to display.
 
+> [!NOTE]
+> Current Ignored LANGs:
+>`glsl,swig,roff,jupyter notebook`
+
 ## Background
 
 When someone views a profile on GitHub, it is often because they are curious
