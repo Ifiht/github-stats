@@ -15,7 +15,7 @@ interesting stats to display.
 
 > [!NOTE]
 > Current Ignored LANGs:
->`glsl,swig,roff,jupyter notebook`
+>`glsl,GLSL,swig,SWIG,roff,jupyter notebook`
 
 ## Background
 
