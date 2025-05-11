@@ -149,12 +149,7 @@ async def main() -> None:
         {x.strip() for x in exclude_langs.split(",")} if exclude_langs else None
     )
     print(f"Excluded languages set: {excluded_langs}")
-    # Convert a truthy value to a Boolean
-    raw_ignore_forked_repos = os.getenv("EXCLUDE_FORKED_REPOS")
-    ignore_forked_repos = (
-        not not raw_ignore_forked_repos
-        and raw_ignore_forked_repos.strip().lower() != "false"
-    )
+
     async with aiohttp.ClientSession() as session:
         s = Stats(
             user,
@@ -162,7 +157,6 @@ async def main() -> None:
             session,
             exclude_repos=excluded_repos,
             exclude_langs=excluded_langs,
-            ignore_forked_repos=ignore_forked_repos,
         )
         await asyncio.gather(
             generate_languages(s),
