@@ -394,6 +394,7 @@ Languages:
         # TODO: Improve languages to scale by number of contributions to
         #       specific filetypes
         langs_total = sum([v.get("size", 0) for v in self._languages.values()])
+        total_prop = 0
         for k, v in self._languages.items():
             v["prop"] = 100 * (v.get("size", 0) / langs_total)
             total_prop += v["prop"]
