@@ -352,12 +352,14 @@ Languages:
                         if langname in self._languages:
                             self._languages[langname]["size"] += lang.get("size", 0)
                             self._languages[langname]["occurrences"] += 1
+                            print(f"Adding {lang.get("size", 0)} bytes of {langname} from {reponame}.")
                         else:
                             self._languages[langname] = {
                                 "size": lang.get("size", 0),
                                 "occurrences": 1,
                                 "color": lang.get("node", {}).get("color"),
                             }
+                            print(f"Adding {lang.get("size", 0)} bytes of {langname} from {reponame}.")
                 """
                 for lang in repo.get("languages", {}).get("edges", []):
                     langname = lang.get("node", {}).get("name", "Other")
@@ -392,6 +394,15 @@ Languages:
         langs_total = sum([v.get("size", 0) for v in self._languages.values()])
         for k, v in self._languages.items():
             v["prop"] = 100 * (v.get("size", 0) / langs_total)
+            total_prop += v["prop"]
+        # Add "Other" category if the sums don't add to 100%
+        if total_prop < 100:
+            self._languages["Other"] = {
+                "size": 0,  # We don't know the actual size
+                "occurrences": 0,
+                "prop": 100 - total_prop,
+                "color": "#c4c4c4"  # Gray for Other
+            }
 
     @property
     async def name(self) -> str:
