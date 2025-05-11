@@ -350,16 +350,18 @@ Languages:
                             print(f"Excluding {langname} from languages in {reponame}.")
                             continue
                         if langname in self._languages:
-                            self._languages[langname]["size"] += lang.get("size", 0)
+                            langsize = lang.get("size", 0)
+                            self._languages[langname]["size"] += langsize
                             self._languages[langname]["occurrences"] += 1
-                            print(f"Adding {lang.get("size", 0)} bytes of {langname} from {reponame}.")
+                            print(f"Adding {langsize} bytes of {langname} from {reponame}.")
                         else:
+                            langsize = lang.get("size", 0)
                             self._languages[langname] = {
-                                "size": lang.get("size", 0),
+                                "size": langsize,
                                 "occurrences": 1,
                                 "color": lang.get("node", {}).get("color"),
                             }
-                            print(f"Adding {lang.get("size", 0)} bytes of {langname} from {reponame}.")
+                            print(f"Adding {langsize} bytes of {langname} from {reponame}.")
                 """
                 for lang in repo.get("languages", {}).get("edges", []):
                     langname = lang.get("node", {}).get("name", "Other")
