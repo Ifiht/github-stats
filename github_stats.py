@@ -128,12 +128,11 @@ class Queries(object):
     login,
     name,
     repositories(
-        first: 40,
+        first: 70,
         orderBy: {{
             field: UPDATED_AT,
             direction: DESC
         }},
-        isFork: false,
         after: {"null" if owned_cursor is None else '"'+ owned_cursor +'"'}
     ) {{
       pageInfo {{
@@ -142,6 +141,7 @@ class Queries(object):
       }}
       nodes {{
         nameWithOwner
+        isFork
         stargazers {{
           totalCount
         }}
@@ -158,7 +158,7 @@ class Queries(object):
       }}
     }}
     repositoriesContributedTo(
-        first: 40,
+        first: 70,
         includeUserRepositories: false,
         orderBy: {{
             field: UPDATED_AT,
@@ -178,6 +178,7 @@ class Queries(object):
       }}
       nodes {{
         nameWithOwner
+        isFork
         stargazers {{
           totalCount
         }}
@@ -257,10 +258,8 @@ class Stats(object):
         session: aiohttp.ClientSession,
         exclude_repos: Optional[Set] = None,
         exclude_langs: Optional[Set] = None,
-        ignore_forked_repos: bool = False,
     ):
         self.username = username
-        self._ignore_forked_repos = ignore_forked_repos
         self._exclude_repos = set() if exclude_repos is None else exclude_repos
         self._exclude_langs = set() if exclude_langs is None else exclude_langs
         self.queries = Queries(username, access_token, session)
@@ -294,6 +293,17 @@ Lines of code changed: {lines_changed[0] + lines_changed[1]:,}
 Project page views: {await self.views:,}
 Languages:
   - {formatted_languages}"""
+    
+    async def user_contributed_to(self, repo):
+        url = f"https://api.github.com/repos/{repo['full_name']}/commits"
+        params = {"author": self.username, "per_page": 1}
+        headers = {"Authorization": f"token {self.token}"}
+        async with self.session.get(url, headers=headers, params=params) as resp:
+            if resp.status != 200:
+                print(f"Failed to check contributions for {repo['full_name']}")
+                return False
+            commits = await resp.json()
+            return len(commits) > 0
 
     async def get_stats(self) -> None:
         """
@@ -332,19 +342,22 @@ Languages:
             )
 
             repos = owned_repos.get("nodes", [])
-            if not self._ignore_forked_repos:
-                repos += contrib_repos.get("nodes", [])
+            # always include not-owned contributions
+            repos += contrib_repos.get("nodes", [])
 
             for repo in repos:
                 if repo is None:
                     continue
+                if repo["isFork"]:
+                    if not await self.user_contributed_to(repo):
+                        continue  # skips uncontributed forks
                 reponame = repo.get("nameWithOwner")
                 if reponame in self._repos or reponame in self._exclude_repos:
                     continue
                 self._repos.add(reponame)
                 self._stargazers += repo.get("stargazers").get("totalCount", 0)
                 self._forks += repo.get("forkCount", 0)
-                # test removing recursive await call
+
                 for lang in repo.get("languages", {}).get("edges", []):
                     langname = lang.get("node", {}).get("name", "Other")
                     if langname in self._exclude_langs:
@@ -363,23 +376,7 @@ Languages:
                             "color": lang.get("node", {}).get("color"),
                         }
                         print(f"Adding {langsize} bytes of {langname} from {reponame}.")
-            """
-            for lang in repo.get("languages", {}).get("edges", []):
-                langname = lang.get("node", {}).get("name", "Other")
-                languages = await self.languages
-                if langname in self._exclude_langs:
-                    print(f"Excluding {langname} from languages in {reponame}.")
-                    continue
-                if langname in languages:
-                    languages[langname]["size"] += lang.get("size", 0)
-                    languages[langname]["occurrences"] += 1
-                else:
-                    languages[langname] = {
-                        "size": lang.get("size", 0),
-                        "occurrences": 1,
-                        "color": lang.get("node", {}).get("color"),
-                    }
-            """
+
             #============ PAGE DEBUG ===========#
             has_next_owned = owned_repos.get("pageInfo", {}).get("hasNextPage", False)
             has_next_contrib = contrib_repos.get("pageInfo", {}).get("hasNextPage", False)
