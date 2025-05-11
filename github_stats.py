@@ -295,12 +295,12 @@ Languages:
   - {formatted_languages}"""
     
     async def user_contributed_to(self, repo):
-        url = f"https://api.github.com/repos/{repo['full_name']}/commits"
+        url = f"https://api.github.com/repos/{repo['nameWithOwner']}/commits"
         params = {"author": self.username, "per_page": 1}
         headers = {"Authorization": f"token {self.token}"}
         async with self.session.get(url, headers=headers, params=params) as resp:
             if resp.status != 200:
-                print(f"Failed to check contributions for {repo['full_name']}")
+                print(f"Failed to check contributions for {repo['nameWithOwner']}")
                 return False
             commits = await resp.json()
             return len(commits) > 0
