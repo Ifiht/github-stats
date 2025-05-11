@@ -145,6 +145,7 @@ async def main() -> None:
         {x.strip() for x in exclude_repos.split(",")} if exclude_repos else None
     )
     exclude_langs = os.getenv("EXCLUDED_LANGS")
+    print(f"Excluded languages set: {exclude_langs}")  # Debug print
     excluded_langs = (
         {x.strip() for x in exclude_langs.split(",")} if exclude_langs else None
     )
