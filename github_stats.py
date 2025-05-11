@@ -334,51 +334,53 @@ Languages:
             repos = owned_repos.get("nodes", [])
             if not self._ignore_forked_repos:
                 repos += contrib_repos.get("nodes", [])
-                for repo in repos:
-                    if repo is None:
-                        continue
-                    reponame = repo.get("nameWithOwner")
-                    if reponame in self._repos or reponame in self._exclude_repos:
-                        continue
-                    self._repos.add(reponame)
-                    self._stargazers += repo.get("stargazers").get("totalCount", 0)
-                    self._forks += repo.get("forkCount", 0)
-                    # test removing recursive await call
-                    for lang in repo.get("languages", {}).get("edges", []):
-                        langname = lang.get("node", {}).get("name", "Other")
-                        if langname in self._exclude_langs:
-                            print(f"Excluding {langname} from languages in {reponame}.")
-                            continue
-                        if langname in self._languages:
-                            langsize = lang.get("size", 0)
-                            self._languages[langname]["size"] += langsize
-                            self._languages[langname]["occurrences"] += 1
-                            print(f"Adding {langsize} bytes of {langname} from {reponame}.")
-                        else:
-                            langsize = lang.get("size", 0)
-                            self._languages[langname] = {
-                                "size": langsize,
-                                "occurrences": 1,
-                                "color": lang.get("node", {}).get("color"),
-                            }
-                            print(f"Adding {langsize} bytes of {langname} from {reponame}.")
-                """
+
+            for repo in repos:
+                if repo is None:
+                    continue
+                reponame = repo.get("nameWithOwner")
+                if reponame in self._repos or reponame in self._exclude_repos:
+                    continue
+                self._repos.add(reponame)
+                self._stargazers += repo.get("stargazers").get("totalCount", 0)
+                self._forks += repo.get("forkCount", 0)
+                # test removing recursive await call
                 for lang in repo.get("languages", {}).get("edges", []):
                     langname = lang.get("node", {}).get("name", "Other")
-                    languages = await self.languages
                     if langname in self._exclude_langs:
                         print(f"Excluding {langname} from languages in {reponame}.")
                         continue
-                    if langname in languages:
-                        languages[langname]["size"] += lang.get("size", 0)
-                        languages[langname]["occurrences"] += 1
+                    if langname in self._languages:
+                        langsize = lang.get("size", 0)
+                        self._languages[langname]["size"] += langsize
+                        self._languages[langname]["occurrences"] += 1
+                        print(f"Adding {langsize} bytes of {langname} from {reponame}.")
                     else:
-                        languages[langname] = {
-                            "size": lang.get("size", 0),
+                        langsize = lang.get("size", 0)
+                        self._languages[langname] = {
+                            "size": langsize,
                             "occurrences": 1,
                             "color": lang.get("node", {}).get("color"),
                         }
-                """
+                        print(f"Adding {langsize} bytes of {langname} from {reponame}.")
+            """
+            for lang in repo.get("languages", {}).get("edges", []):
+                langname = lang.get("node", {}).get("name", "Other")
+                languages = await self.languages
+                if langname in self._exclude_langs:
+                    print(f"Excluding {langname} from languages in {reponame}.")
+                    continue
+                if langname in languages:
+                    languages[langname]["size"] += lang.get("size", 0)
+                    languages[langname]["occurrences"] += 1
+                else:
+                    languages[langname] = {
+                        "size": lang.get("size", 0),
+                        "occurrences": 1,
+                        "color": lang.get("node", {}).get("color"),
+                    }
+            """
+            
             if owned_repos.get("pageInfo", {}).get(
                 "hasNextPage", False
             ) or contrib_repos.get("pageInfo", {}).get("hasNextPage", False):
