@@ -17,6 +17,9 @@ interesting stats to display.
 > Current Ignored LANGs:
 >`GLSL,SWIG,Roff,Jupyter Notebook,FreeMarker`
 
+## Statistics
+To analyze which repos are contributing what to the generated statistics, copy the logs from the GitHub actions and save them to a file named `list.txt`. Then run `sort -n -r -k2 list.txt` from a shell on the file. The result will give you a new list in descending order of how many bytes of what language each repository contributed.
+
 ## Background
 
 When someone views a profile on GitHub, it is often because they are curious
