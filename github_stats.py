@@ -128,7 +128,7 @@ class Queries(object):
     login,
     name,
     repositories(
-        first: 100,
+        first: 40,
         orderBy: {{
             field: UPDATED_AT,
             direction: DESC
@@ -158,7 +158,7 @@ class Queries(object):
       }}
     }}
     repositoriesContributedTo(
-        first: 100,
+        first: 40,
         includeUserRepositories: false,
         orderBy: {{
             field: UPDATED_AT,
@@ -380,12 +380,25 @@ Languages:
                         "color": lang.get("node", {}).get("color"),
                     }
             """
-            print(f"Current repos processed: {len(self._repos)}")
-            print(f"Owned repos has next page: {owned_repos.get('pageInfo', {}).get('hasNextPage', False)}")
-            print(f"Contrib repos has next page: {contrib_repos.get('pageInfo', {}).get('hasNextPage', False)}")
-            print(f"Next owned cursor: {owned_repos.get('pageInfo', {}).get('endCursor', next_owned)}")
-            print(f"Next contrib cursor: {contrib_repos.get('pageInfo', {}).get('endCursor', next_contrib)}")
-
+            #============ PAGE DEBUG ===========#
+            has_next_owned = owned_repos.get("pageInfo", {}).get("hasNextPage", False)
+            has_next_contrib = contrib_repos.get("pageInfo", {}).get("hasNextPage", False)
+            
+            print(f"Repositories found in this page: {len(repos)}")
+            print(f"Total repositories so far: {len(self._repos)}")
+            print(f"Owned repos has next page: {has_next_owned}")
+            print(f"Contrib repos has next page: {has_next_contrib}")
+            
+            if has_next_owned or has_next_contrib:
+                next_owned = owned_repos.get("pageInfo", {}).get("endCursor", next_owned)
+                next_contrib = contrib_repos.get("pageInfo", {}).get("endCursor", next_contrib)
+                print(f"Fetching next page with cursors:")
+                print(f"  Owned: {next_owned}")
+                print(f"  Contrib: {next_contrib}")
+            else:
+                print("No more pages to fetch")
+                break
+            #====================================#
             if owned_repos.get("pageInfo", {}).get(
                 "hasNextPage", False
             ) or contrib_repos.get("pageInfo", {}).get("hasNextPage", False):
