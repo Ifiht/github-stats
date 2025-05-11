@@ -293,17 +293,6 @@ Lines of code changed: {lines_changed[0] + lines_changed[1]:,}
 Project page views: {await self.views:,}
 Languages:
   - {formatted_languages}"""
-    
-    async def user_contributed_to(self, repo):
-        url = f"https://api.github.com/repos/{repo['nameWithOwner']}/commits"
-        params = {"author": self.username, "per_page": 1}
-        headers = {"Authorization": f"token {self.token}"}
-        async with self.session.get(url, headers=headers, params=params) as resp:
-            if resp.status != 200:
-                print(f"Failed to check contributions for {repo['nameWithOwner']}")
-                return False
-            commits = await resp.json()
-            return len(commits) > 0
 
     async def get_stats(self) -> None:
         """
@@ -348,9 +337,9 @@ Languages:
             for repo in repos:
                 if repo is None:
                     continue
-                if repo["isFork"]:
-                    if not await self.user_contributed_to(repo):
-                        continue  # skips uncontributed forks
+                #if repo["isFork"]:
+                #    if not await self.user_contributed_to(repo):
+                #        continue  # skips uncontributed forks
                 reponame = repo.get("nameWithOwner")
                 if reponame in self._repos or reponame in self._exclude_repos:
                     continue
@@ -385,16 +374,6 @@ Languages:
             print(f"Total repositories so far: {len(self._repos)}")
             print(f"Owned repos has next page: {has_next_owned}")
             print(f"Contrib repos has next page: {has_next_contrib}")
-            
-            if has_next_owned or has_next_contrib:
-                next_owned = owned_repos.get("pageInfo", {}).get("endCursor", next_owned)
-                next_contrib = contrib_repos.get("pageInfo", {}).get("endCursor", next_contrib)
-                print(f"Fetching next page with cursors:")
-                print(f"  Owned: {next_owned}")
-                print(f"  Contrib: {next_contrib}")
-            else:
-                print("No more pages to fetch")
-                break
             #====================================#
             if owned_repos.get("pageInfo", {}).get(
                 "hasNextPage", False
