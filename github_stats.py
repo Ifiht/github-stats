@@ -380,7 +380,12 @@ Languages:
                         "color": lang.get("node", {}).get("color"),
                     }
             """
-            
+            print(f"Current repos processed: {len(self._repos)}")
+            print(f"Owned repos has next page: {owned_repos.get('pageInfo', {}).get('hasNextPage', False)}")
+            print(f"Contrib repos has next page: {contrib_repos.get('pageInfo', {}).get('hasNextPage', False)}")
+            print(f"Next owned cursor: {owned_repos.get('pageInfo', {}).get('endCursor', next_owned)}")
+            print(f"Next contrib cursor: {contrib_repos.get('pageInfo', {}).get('endCursor', next_contrib)}")
+
             if owned_repos.get("pageInfo", {}).get(
                 "hasNextPage", False
             ) or contrib_repos.get("pageInfo", {}).get("hasNextPage", False):
